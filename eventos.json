@@ -1,0 +1,22 @@
+[
+    {
+        "fecha": "2023-04-12T18:15:00.000+02:00",
+        "titulo": "Ir al gimnasio",
+        "duracion": 180
+    }, 
+    {
+        "fecha": "2023-04-12T18:15:00.000+02:00",
+        "titulo": "Hacer la cama",
+        "duracion": 5
+    },
+    {
+        "fecha": "2023-04-12T18:15:00.000+02:00",
+        "titulo": "Preparar la comida",
+        "duracion": 15
+    },
+    {
+        "fecha": "2023-04-12T18:15:00.000+02:00",
+        "titulo": "Que me desbanen de AulaEstudio",
+        "duracion": 150
+    }
+]
