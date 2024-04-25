@@ -27,45 +27,121 @@
 // 5. Salir
 // Cada vez que se agregue o se borre un evento se tendrá que actualizar el JSON.
 
-const {DateTime} = require('luxon');
+const { DateTime } = require("luxon");
+const fs = require("fs");
 
 class Agenda {
-  constructor(json){
-    this.eventos = this.cargarJSON(json);
-    this.listaTareas = [];
+  constructor(json) {
+    this.listaEventos = this.cargarJSON(json);
   }
 
-  getEventos() {
-    return this.eventos;
+  getListaEventos() {
+    return this.listaEventos;
   }
 
   cargarJSON(eventosJson) {
     try {
-      const eventoJSON = fs.readFileSync(eventosJson, "utf8");
-      return JSON.parse(eventoJSON);
+      // Leer datos JSON
+      const datosJSON = fs.readFileSync(eventosJson, "utf8");
+      // Paersear el contenido del json para trabajar en javascript
+      return JSON.parse(datosJSON);
     } catch (error) {
       console.error("Error al cargar la carta: ", error);
       return [];
     }
   }
 
-  agregarTareas(tarea){
-    this.listaTareas.push(tarea);
+  guardarJSON() {
+    try {
+      fs.writeFileSync(
+        "eventos.json",
+        JSON.stringify(this.listaEventos, null, 2)
+      ); // Repasar pq el null y el 2
+    } catch (error) {
+      console.log("Error al guardar en la agenda: ", error);
+    }
   }
 
-  getTareas(){
-    return this.listaTareas;
+  async nuevoEvento() {
+    console.log("Crear nuevo evento:\n");
+    let diaInput = await leeMenu("Dia:\n");
+    let mesInput = await leeMenu("Mes:\n");
+    let anhoInput = await leeMenu("Anho:\n");
+    let horaInput = await leeMenu("Hora:\n");
+    let minutosInput = await leeMenu("Minutos:\n");
+    diaInput = parseInt(diaInput);
+    mesInput = parseInt(mesInput);
+    anhoInput = parseInt(anhoInput);
+    (horaInput = parseInt(horaInput)), (minutosInput = parseInt(minutosInput));
+    let descripcionInput = await leeMenu("Que tarea va ha realizar:\n");
+    let duracionInput = await leeMenu("Cuantos minutos va ha durar la tarea:\n");
+    duracionInput = parseInt(duracionInput);
+
+    // Confirmar si los valores de fecha y hora son válidos
+    if (isNaN(diaInput) || isNaN(mesInput) || isNaN(anhoInput) || isNaN(horaInput) || isNaN(minutosInput)) {
+      console.log(
+        "Por favor, ingrese valores numéricos válidos para la fecha y la hora."
+      );
+      return;
+    }
+
+    const fechaEvento = DateTime.fromObject({
+      year: anhoInput,
+      month: mesInput,
+      day: diaInput,
+      hour: horaInput,
+      minute: minutosInput,
+    });
+
+    if (!fechaEvento.isValid) {
+      console.log("La fecha ingresada no es válida.");
+      return;
+    }
+
+    const nuevoEvento = {
+      fecha: fechaEvento.toISO(),
+      titulo: descripcionInput,
+      duracion: duracionInput,
+    };
+
+    const fechaInicio = DateTime.fromISO(nuevoEvento.fecha);
+    const fechaFinal = fechaInicio.plus({ minutes: duracionInput });
+
+    let solapado = false;
+    for (const cadaevento of this.listaEventos) {
+      const eventoFechaInicio = DateTime.fromISO(cadaevento.fecha);
+      const eventoFechaFinal = eventoFechaInicio.plus({
+        minutes: cadaevento.duracion,
+      });
+      if (fechaInicio < eventoFechaFinal && fechaFinal > eventoFechaInicio) {
+        solapado = true;
+        console.log("Lo siento, al parecer su nueva tarea se solapa con otra.");
+        break;
+      }
+    }
+
+    if (solapado === false) {
+        this.listaEventos.push(nuevoEvento);
+        this.guardarJSON();
+        console.log("Ok, la tarea se ha creado correctamente.");
+    }
+    
+  }
+
+  async verEventosHoy(){
+    console.log("Estos son tus eventos de hoy: ")
   }
 }
+
 class Tareas {
-  constructor(fecha, titulo, duracion){
+  constructor(fecha, titulo, duracion) {
     this.fecha = fecha;
     this.titulo = titulo;
-    this.duracion = duracion
+    this.duracion = duracion;
   }
 }
 
-const miAgenda = new Agenda('eventos.json');
+const miAgenda = new Agenda("eventos.json");
 
 const readline = require("readline");
 const rl = readline.createInterface({
@@ -95,6 +171,7 @@ async function menuAgenda() {
     switch (menu) {
       case 1:
         console.log("Opción 1: Nuevo evento");
+        await miAgenda.nuevoEvento();
         console.log("\n");
         break;
       case 2:
@@ -123,36 +200,3 @@ async function menuAgenda() {
 }
 
 menuAgenda();
-
-async function nuevoEvento() {
-    console.log("Cuando sera el nuevo evento:\n");
-    let diaInput = await leeMenu("Dia:\n");
-    let mesInput = await leeMenu("Mes:\n");
-    let anhoInput = await leeMenu("Anho:\n");
-    let horaInput = await leeMenu("Hora:\n");
-    let minutosInput = await leeMenu("Minutos:\n");
-    diaInput = parseInt(diaInput);
-    mesInput = parseInt(mesInput);
-    anhoInput = parseInt(anhoInput);
-    horaInput = parseInt(horaInput),
-    minutosInput = parseInt(minutosInput);
-    let descripcionInput = await leeMenu("Que tarea va ha realizar:\n");
-    let duracionInput = await leeMenu("Cunatos minutos va ha durar la tarea:\n");
-    duracionInput = parseInt(duracionInput);
-
-    const fechaEvento = DateTime.local(anhoInput, mesInput, diaInput, horaInput, minutosInput);
-
-    const nuevoEvento = {
-      "fecha": fechaEvento,
-      "titulo": descripcionInput,
-      "duracion": duracionInput
-    }
-
-
-    // miAgenda.agregarTareas.push(nuevoEvento, descripcionInput, duracionInput);
-    // console.log("El evento ha sido agregado");
-}
-
-async function eventosHoy() {
-    
-}
