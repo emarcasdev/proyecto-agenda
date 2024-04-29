@@ -161,6 +161,11 @@ class Agenda {
     mesInput = parseInt(mesInput);
     anhoInput = parseInt(anhoInput);
   
+    if (isNaN(diaInput) || isNaN(mesInput) || isNaN(anhoInput)) {
+      console.log("Por favor, ingrese valores numéricos válidos para la fecha y la hora.");
+      return;
+    }
+
     const fechaBuscada = DateTime.fromObject({
       year: anhoInput,
       month: mesInput,
