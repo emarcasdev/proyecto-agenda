@@ -53,10 +53,7 @@ class Agenda {
 
   guardarJSON() {
     try {
-      fs.writeFileSync(
-        "eventos.json",
-        JSON.stringify(this.listaEventos, null, 2)
-      ); // Repasar pq el null y el 2
+      fs.writeFileSync("eventos.json",JSON.stringify(this.listaEventos, null, 2)); // Repasar pq el null y el 2
     } catch (error) {
       console.log("Error al guardar en la agenda: ", error);
     }
@@ -72,16 +69,15 @@ class Agenda {
     diaInput = parseInt(diaInput);
     mesInput = parseInt(mesInput);
     anhoInput = parseInt(anhoInput);
-    (horaInput = parseInt(horaInput)), (minutosInput = parseInt(minutosInput));
+    horaInput = parseInt(horaInput);
+    minutosInput = parseInt(minutosInput);
     let descripcionInput = await leeMenu("Que tarea va ha realizar:\n");
     let duracionInput = await leeMenu("Cuantos minutos va ha durar la tarea:\n");
     duracionInput = parseInt(duracionInput);
 
     // Confirmar si los valores de fecha y hora son válidos
     if (isNaN(diaInput) || isNaN(mesInput) || isNaN(anhoInput) || isNaN(horaInput) || isNaN(minutosInput)) {
-      console.log(
-        "Por favor, ingrese valores numéricos válidos para la fecha y la hora."
-      );
+      console.log("Por favor, ingrese valores numéricos válidos para la fecha y la hora.");
       return;
     }
 
@@ -129,15 +125,90 @@ class Agenda {
   }
 
   async verEventosHoy(){
-    console.log("Estos son tus eventos de hoy: ")
-  }
-}
+    const hoy = DateTime.local();
+    let eventosDeHoy = [];
+    for (const evento of this.listaEventos) {
+        const fechaInicio = DateTime.fromISO(evento.fecha);
+        if (fechaInicio.hasSame(hoy, 'day')) {
+            eventosDeHoy.push(evento);
+        }
+    }
 
-class Tareas {
-  constructor(fecha, titulo, duracion) {
-    this.fecha = fecha;
-    this.titulo = titulo;
-    this.duracion = duracion;
+    if (eventosDeHoy.length === 0) {
+        console.log("No tienes eventos para el dia de hoy.");
+        return;
+    }
+    
+    console.log("Eventos para el dia de hoy:");
+    for (let i = 0; i < eventosDeHoy.length; i++) {
+        const evento = eventosDeHoy[i];
+        const fechaInicio = DateTime.fromISO(evento.fecha);
+        const fechaFin = fechaInicio.plus({ minutes: evento.duracion });
+        console.log(`${i + 1}. El evento que tiene es: ${evento.titulo}`);
+        console.log(`   - Empieza a las: ${fechaInicio.toFormat('HH:mm')}`);
+        console.log(`   - Termina a las: ${fechaFin.toFormat('HH:mm')}`);
+  }
+  }
+
+  async buscarEventos(){
+    console.log("Seleciona la fecha de los eventos que quieres ver: ");
+    let anhoInput = await leeMenu("Anho:\n");
+    let mesInput = await leeMenu("Mes:\n");
+    let diaInput = await leeMenu("Dia:\n");
+    diaInput = parseInt(diaInput);
+    mesInput = parseInt(mesInput);
+    anhoInput = parseInt(anhoInput);
+  
+    const fechaBuscada = DateTime.fromObject({
+      year: anhoInput,
+      month: mesInput,
+      day: diaInput,
+    });
+
+    let eventosFechaBuscada = [];
+    for (let i = 0; i < this.listaEventos.length; i++) {
+      const evento = this.listaEventos[i];
+      const fechaEvento = DateTime.fromISO(evento.fecha);
+      if (fechaEvento.hasSame(fechaBuscada, 'day')) { // el hasSame sirve para verificar si los eventos ocurren en la misma fecha que la fecha buscada por el usuario.
+        eventosFechaBuscada.push(evento);
+      }
+    }
+
+    if (eventosFechaBuscada.length === 0) {
+      console.log('No hay eventos en esa fecha');
+      return;
+    }
+
+    console.log(`Eventos para la fecha ${fechaBuscada.toFormat('dd/MM/yyyy')}:`);
+    for (let i = 0; i < eventosFechaBuscada.length; i++) {
+        const evento = eventosFechaBuscada[i];
+        const fechaInicio = DateTime.fromISO(evento.fecha);
+        const fechaFin = fechaInicio.plus({ minutes: evento.duracion });
+        console.log(`${i + 1}. El evento que tiene es: ${evento.titulo}`);
+        console.log(`   - Empieza a las: ${fechaInicio.toFormat('HH:mm')}`);
+        console.log(`   - Termina a las: ${fechaFin.toFormat('HH:mm')}`);
+    }
+
+  }
+
+  async eliminarEventos(){
+    console.log("Estos son tus eventos que se han creado y puedes eliminar: ");
+    for (let i = 0; i < this.listaEventos.length; i++) {
+      let fecha = DateTime.fromISO(this.listaEventos[i].fecha);
+      console.log(`${[i + 1]}. Su tarea es:"${this.listaEventos[i].titulo}", y la fecha es a las ${fecha.toFormat('HH:mm el dd/MM/yyyy ')}`);
+    }
+
+    let idEliminar = await leeMenu("Ingrese el id del evento a eliminar:\n")
+    idEliminar = parseInt(idEliminar);
+    
+    if (idEliminar >= 1 && idEliminar <= this.listaEventos.length) {
+      this.listaEventos.splice(idEliminar - 1, 1);
+      this.guardarJSON();
+      console.log("Se borró el evento con el ID: " + idEliminar + ".");
+      this.getListaEventos();
+    } else {
+      console.log('No hay eventos con la ID: ' + idEliminar + ".");
+    }
   }
 }
 
@@ -176,14 +247,17 @@ async function menuAgenda() {
         break;
       case 2:
         console.log("Opción 2: Ver eventos de hoy");
+        await miAgenda.verEventosHoy();
         console.log("\n");
         break;
       case 3:
         console.log("Opción 3: Buscar eventos para una fecha");
+        await miAgenda.buscarEventos();
         console.log("\n");
         break;
       case 4:
         console.log("Opción 4: Borrar evento");
+        await miAgenda.eliminarEventos();
         console.log("\n");
         break;
       case 5:

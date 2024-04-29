@@ -20,8 +20,13 @@
     "duracion": 150
   },
   {
-    "fecha": "2079-02-12T21:21:00.000+01:00",
-    "titulo": "69",
-    "duracion": 4
+    "fecha": "0001-01-01T01:01:00.000-00:14",
+    "titulo": "1",
+    "duracion": 1
+  },
+  {
+    "fecha": "2024-04-29T20:45:00.000+02:00",
+    "titulo": "Salir de clase.",
+    "duracion": 5
   }
 ]
