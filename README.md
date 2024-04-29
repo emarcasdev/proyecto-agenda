@@ -16,4 +16,4 @@ Nuestra agenda tendra que poder hacer lo siguiente:
 - Mostrar los eventos de una fecha solicitada por un usuario, con su titulo, fecha de inicio y final.
 - Mostrar la lista de eventos que podemos eliminar y poder eliminar un evento del JSON.
 
--- Estas funcionalidades deben estar en un menu y que podamos salir de el.
+-- Estas funcionalidades deben estar dentro de un menú y que podamos salir de él.
