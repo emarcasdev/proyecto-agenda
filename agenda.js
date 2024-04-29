@@ -125,11 +125,13 @@ class Agenda {
   }
 
   async verEventosHoy(){
-    const hoy = DateTime.local();
+    const hoy = DateTime.now();
+    const hoyISO = hoy.toISODate();
     let eventosDeHoy = [];
     for (const evento of this.listaEventos) {
         const fechaInicio = DateTime.fromISO(evento.fecha);
-        if (fechaInicio.hasSame(hoy, 'day')) {
+        const fechaInicioISO = fechaInicio.toISODate();
+        if (hoyISO === fechaInicioISO) {
             eventosDeHoy.push(evento);
         }
     }
@@ -169,7 +171,7 @@ class Agenda {
     for (let i = 0; i < this.listaEventos.length; i++) {
       const evento = this.listaEventos[i];
       const fechaEvento = DateTime.fromISO(evento.fecha);
-      if (fechaEvento.hasSame(fechaBuscada, 'day')) { // el hasSame sirve para verificar si los eventos ocurren en la misma fecha que la fecha buscada por el usuario.
+      if (fechaEvento.year === fechaBuscada.year && fechaEvento.month === fechaBuscada.month && fechaEvento.day === fechaBuscada.day) { 
         eventosFechaBuscada.push(evento);
       }
     }
