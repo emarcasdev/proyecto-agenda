@@ -167,11 +167,14 @@ class Agenda {
       day: diaInput,
     });
 
+    const fechaBuscadaISO = fechaBuscada.toISODate();
+
     let eventosFechaBuscada = [];
     for (let i = 0; i < this.listaEventos.length; i++) {
       const evento = this.listaEventos[i];
       const fechaEvento = DateTime.fromISO(evento.fecha);
-      if (fechaEvento.year === fechaBuscada.year && fechaEvento.month === fechaBuscada.month && fechaEvento.day === fechaBuscada.day) { 
+      const fechaEventoISO = fechaEvento.toISODate();
+      if (fechaBuscadaISO === fechaEventoISO) { 
         eventosFechaBuscada.push(evento);
       }
     }
